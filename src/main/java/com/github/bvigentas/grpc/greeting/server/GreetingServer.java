@@ -2,6 +2,7 @@ package com.github.bvigentas.grpc.greeting.server;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 
 import java.io.IOException;
 
@@ -12,6 +13,7 @@ public class GreetingServer {
 
         Server server = ServerBuilder.forPort(50053)
                 .addService(new GreetServiceImpl())
+                .addService(ProtoReflectionService.newInstance())
                 .build();
 
         server.start();
