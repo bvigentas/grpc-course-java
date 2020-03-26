@@ -1,10 +1,6 @@
 package com.github.bvigentas.grpc.greeting.client;
 
-import com.proto.dummy.DummyServiceGrpc;
-import com.proto.greet.GreetRequest;
-import com.proto.greet.GreetResponse;
-import com.proto.greet.GreetServiceGrpc;
-import com.proto.greet.Greeting;
+import com.proto.greet.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -13,7 +9,7 @@ public class GreetingClient {
     public static void main(String[] args) {
         System.out.println("Hello I'm a gRPC Client");
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50051)
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50053)
                 .usePlaintext()// Bypass on SSL
                 .build();
 
@@ -28,6 +24,8 @@ public class GreetingClient {
                 .setLastName("Vigentas")
                 .build();
 
+        /*
+        // UNARY
         //Create proto buff request
         GreetRequest greetRequest = GreetRequest.newBuilder()
                 .setGreeting(greeting)
@@ -37,8 +35,20 @@ public class GreetingClient {
         GreetResponse greetResponse = greetCliente.greet(greetRequest);
 
         System.out.println(greetResponse.getResult());
+        */
 
-        //Do something
+
+        // SERVER STREAMING
+
+        GreetManyTimesRequest request = GreetManyTimesRequest.newBuilder()
+                .setGreeting(greeting)
+                .build();
+
+        greetCliente.greetManyTimes(request)
+                .forEachRemaining(greetManyTimesResponse -> {
+                    System.out.println(greetManyTimesResponse.getResult());
+                });
+
 
         System.out.println("Shutting down channel");
         channel.shutdown();
