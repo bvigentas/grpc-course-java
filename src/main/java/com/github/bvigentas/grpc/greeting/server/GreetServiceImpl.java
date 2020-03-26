@@ -50,4 +50,66 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
 
         responseObserver.onCompleted();
     }
+
+    @Override
+    public StreamObserver<LongGreetRequest> longGreet(StreamObserver<LongGreetResponse> responseObserver) {
+
+        StreamObserver<LongGreetRequest> requestObserver = new StreamObserver<LongGreetRequest>() {
+
+            String result = "";
+
+            @Override
+            public void onNext(LongGreetRequest value) {
+                //Client sends a message
+                result += "Hello " + value.getGreting().getFirstName() + "! ";
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                //Client sends a error
+            }
+
+            @Override
+            public void onCompleted() {
+                //Client is done
+                responseObserver.onNext(
+                        LongGreetResponse.newBuilder()
+                                .setResult(result)
+                                .build()
+                );
+
+                responseObserver.onCompleted();
+                //When we want to return a response
+            }
+        };
+
+        return requestObserver;
+
+    }
+
+    @Override
+    public StreamObserver<GreetEveryoneRequest> greetEveryone(StreamObserver<GreetEveryoneResponse> responseObserver) {
+        StreamObserver<GreetEveryoneRequest> requestObserver = new StreamObserver<GreetEveryoneRequest>() {
+            @Override
+            public void onNext(GreetEveryoneRequest value) {
+                String result = "Hello " + value.getGreeting().getFirstName();
+
+                GreetEveryoneResponse greetEveryoneResponse = GreetEveryoneResponse.newBuilder().setResult(result).build();
+
+                responseObserver.onNext(greetEveryoneResponse);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
+            }
+        };
+
+        return requestObserver;
+    }
 }
