@@ -1,6 +1,7 @@
 package com.github.bvigentas.grpc.greeting.server;
 
 import com.proto.greet.*;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 
 public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
@@ -111,5 +112,33 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
         };
 
         return requestObserver;
+    }
+
+    @Override
+    public void greetWithDeadLine(GreetWithDeadLineRequest request, StreamObserver<GreetWithDeadLineResponse> responseObserver) {
+
+        Context current = Context.current();
+
+        try {
+            for (int i = 0; i < 3; i++) {
+                if (!current.isCancelled()) {
+                    System.out.println("Sleep");
+                    Thread.sleep(300);
+                } else {
+                    return;
+                }
+
+            }
+
+            System.out.println("Send Response");
+            responseObserver.onNext(GreetWithDeadLineResponse.newBuilder()
+                    .setResult("Hello " + request.getGreeting().getFirstName())
+                    .build());
+
+            responseObserver.onCompleted();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

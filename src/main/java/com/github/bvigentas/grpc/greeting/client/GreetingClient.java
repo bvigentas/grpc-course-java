@@ -1,8 +1,7 @@
 package com.github.bvigentas.grpc.greeting.client;
 
 import com.proto.greet.*;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 
 import java.util.Arrays;
@@ -21,11 +20,42 @@ public class GreetingClient {
         //doUnaryCall(channel);
         //doServerStreamingCall(channel);
         //doClientStreamingCall(channel);
-        doBiDiStreamingCall(channel);
+        //doBiDiStreamingCall(channel);
+        doUnaryCallWithDeadline(channel);
 
         System.out.println("Shutting down channel");
         channel.shutdown();
 
+    }
+
+    private void doUnaryCallWithDeadline(ManagedChannel channel) {
+        GreetServiceGrpc.GreetServiceBlockingStub greetCliente = GreetServiceGrpc.newBlockingStub(channel);
+
+        try {
+            //First call 500ms deadline
+            GreetWithDeadLineResponse response1 = greetCliente.withDeadline(Deadline.after(3000, TimeUnit.MILLISECONDS)).greetWithDeadLine(GreetWithDeadLineRequest.newBuilder()
+                    .setGreeting(Greeting.newBuilder().setFirstName("Bruno")).build());
+
+            System.out.println(response1.getResult());
+
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus() == Status.DEADLINE_EXCEEDED) {
+                System.out.println("Deadline has been exceeded, we dont whant the response anymore");
+            }
+        }
+
+        try {
+            //First call 100ms deadline
+            GreetWithDeadLineResponse response2 = greetCliente.withDeadline(Deadline.after(100, TimeUnit.MILLISECONDS)).greetWithDeadLine(GreetWithDeadLineRequest.newBuilder()
+                    .setGreeting(Greeting.newBuilder().setFirstName("Bruno")).build());
+
+            System.out.println(response2.getResult());
+
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus() == Status.DEADLINE_EXCEEDED) {
+                System.out.println("Deadline has been exceeded, we dont whant the response anymore");
+            }
+        }
     }
 
     private void doBiDiStreamingCall(ManagedChannel channel) {
